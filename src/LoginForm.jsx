@@ -2,15 +2,27 @@ import { useState } from 'react';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function LoginForm() {
+function LoginForm({ onLogin = () => {} }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
   const isEmailValid = emailPattern.test(email);
   const isPasswordValid = password.length >= 8;
 
+  function handleSubmit(event) {
+    event.preventDefault();
+
+    if (!isEmailValid || !isPasswordValid) {
+      return;
+    }
+
+    onLogin({ email, password });
+    setSubmitted(true);
+  }
+
   return (
-    <form onSubmit={(event) => event.preventDefault()}>
+    <form onSubmit={handleSubmit}>
       <div>
         <label htmlFor="email">Email</label>
         <input
@@ -18,7 +30,10 @@ function LoginForm() {
           name="email"
           type="email"
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            setSubmitted(false);
+          }}
           aria-invalid={email.length > 0 && !isEmailValid}
           aria-describedby="email-error"
         />
@@ -34,7 +49,10 @@ function LoginForm() {
           name="password"
           type="password"
           value={password}
-          onChange={(event) => setPassword(event.target.value)}
+          onChange={(event) => {
+            setPassword(event.target.value);
+            setSubmitted(false);
+          }}
           aria-invalid={password.length > 0 && !isPasswordValid}
           aria-describedby="password-error"
         />
@@ -46,6 +64,7 @@ function LoginForm() {
       <button type="submit" disabled={!isEmailValid || !isPasswordValid}>
         Submit
       </button>
+      {submitted && <p role="status">Login successful.</p>}
     </form>
   );
 }
